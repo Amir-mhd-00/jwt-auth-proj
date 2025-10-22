@@ -6,7 +6,8 @@ router = APIRouter(
     tags=["Users"]
 )
 
-# Move your existing 'protected' route here
-@router.get("/protected")
-def protected_route(token: str = Depends(JWTBearer())):
-    return {"message": "This is a protected route"}
+@router.get("/protected", dependencies=[Depends(rate_limiter())])
+def protected(request: Request, credentials: HTTPAuthorizationCredentials = Depends()):
+    _, Skey = get_current_key()
+    payload = jwt.decode(credentials.credentials, Skey, algorithms=[ALGORITHM])
+    return {"message": f"Hello {payload['sub']}, token valid!"}
