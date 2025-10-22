@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends
-from app.auth.auth_bearer import JWTBearer
+from fastapi import APIRouter, Request, Depends
+from fastapi.security import HTTPAuthorizationCredentials
+import jwt
+from app.utils import rate_limiter, get_current_key
+from app.config import ALGORITHM
 
 router = APIRouter(
     prefix="/users",
-    tags=["Users"]
+    tags=["users"]
 )
 
 @router.get("/protected", dependencies=[Depends(rate_limiter())])
