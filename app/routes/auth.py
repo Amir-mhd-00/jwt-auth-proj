@@ -40,11 +40,6 @@ def login(request: Request, data: LoginRequest):
     access_token, refresh_token = create_tokens(request, data.username)
     return {"access_token": access_token, "refresh_token": refresh_token}
 
-@router.get("/protected", dependencies=[Depends(rate_limiter())])
-def protected(request: Request, credentials: HTTPAuthorizationCredentials = Depends()):
-    _, Skey = get_current_key()
-    payload = jwt.decode(credentials.credentials, Skey, algorithms=[ALGORITHM])
-    return {"message": f"Hello {payload['sub']}, token valid!"}
 
 @router.get("/admin-only", dependencies=[Depends(rate_limiter())])
 def admin_only(payload = Depends(require_role(["admin"]))):
