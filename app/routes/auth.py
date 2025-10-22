@@ -10,7 +10,7 @@ from app.config import redis_client, ALGORITHM
 router = APIRouter(prefix="", tags=["Auth"])
 
 @router.post("/register")
-def register_user(data: RegisterRequest):
+def register(data: RegisterRequest):
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     cur.execute("SELECT * FROM users WHERE username = %s", (data.username,))
