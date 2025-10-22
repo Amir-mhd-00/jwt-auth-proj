@@ -47,11 +47,16 @@ def admin_only(payload = Depends(require_role(["admin"]))):
 
 @router.post("/refresh", dependencies=[Depends(rate_limiter())])
 def refresh(request: Request, data: TokenRequest):
-    _, Skey = get_current_key()
-    payload = jwt.decode(data.refresh_token, Skey, algorithms=["HS512"])
-    username = payload["sub"]
-    access_token, refresh_token = create_tokens(request, username)
-    return {"access_token": access_token, "refresh_token": refresh_token}
+    try:
+        _, Skey = get_current_key()
+        payload = jwt.decode(data.refresh_token, Skey, algorithms=["HS512"])
+        username = payload["sub"]
+        access_token, refresh_token = create_tokens(request, username)
+        return {"access_token": access_token, "refresh_token": refresh_token}
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 @router.post("/logout")
 def logout(credentials: HTTPAuthorizationCredentials = Depends()):
